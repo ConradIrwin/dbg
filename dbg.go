@@ -34,7 +34,7 @@ func Dbg(args ...any) {
 	for i, arg := range args {
 		dumped := strings.TrimSpace(spew.Sdump(arg))
 		fmt.Printf(" %s = %s", argNames[i], strings.ReplaceAll(dumped, "\n", "  \n"))
-		if strings.Contains(dumped, "\n") {
+		if strings.Contains(dumped, "\n") || i == len(args)-1 {
 			fmt.Print("\n")
 		} else {
 			fmt.Print(",")
