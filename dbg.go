@@ -9,6 +9,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -19,25 +20,30 @@ import (
 
 // Dbg pretty-prints its arguments with their names, types and values to os.Stdout.
 func Dbg(args ...any) {
+	To(os.Stdout, args...)
+}
+
+// To pretty-prints its arguments with their names, types and values to the given Writer.
+func To(w io.Writer, args ...any) {
 	_, file, line, _ := runtime.Caller(1)
 	argNames := extractFunctionCallArgs(file, line)
 	fileName := filepath.Base(file)
-	fmt.Printf("%s:%d:", fileName, line)
+	fmt.Fprintf(w, "%s:%d:", fileName, line)
 	if len(args) == 0 {
-		fmt.Println()
+		fmt.Fprintln(w)
 		return
 	}
 	if len(argNames) != len(args) {
-		spew.Dump(args...)
+		spew.Fdump(w, args...)
 		return
 	}
 	for i, arg := range args {
 		dumped := strings.TrimSpace(spew.Sdump(arg))
-		fmt.Printf(" %s = %s", argNames[i], strings.ReplaceAll(dumped, "\n", "  \n"))
+		fmt.Fprintf(w, " %s = %s", argNames[i], strings.ReplaceAll(dumped, "\n", "  \n"))
 		if strings.Contains(dumped, "\n") || i == len(args)-1 {
-			fmt.Print("\n")
+			fmt.Fprint(w, "\n")
 		} else {
-			fmt.Print(",")
+			fmt.Fprint(w, ",")
 		}
 	}
 }
