@@ -20,12 +20,16 @@ import (
 
 // Dbg pretty-prints its arguments with their names, types and values to os.Stdout.
 func Dbg(args ...any) {
-	To(os.Stdout, args...)
+	impl(os.Stdout, args...)
 }
 
 // To pretty-prints its arguments with their names, types and values to the given Writer.
 func To(w io.Writer, args ...any) {
-	_, file, line, _ := runtime.Caller(1)
+	impl(w, args...)
+}
+
+func impl(w io.Writer, args ...any) {
+	_, file, line, _ := runtime.Caller(2)
 	argNames := extractFunctionCallArgs(file, line)
 	fileName := filepath.Base(file)
 	fmt.Fprintf(w, "%s:%d:", fileName, line)
@@ -70,7 +74,7 @@ func extractFunctionCallArgs(filename string, lineNum int) (args []string) {
 		}
 		if fn, ok := callExpr.Fun.(*ast.SelectorExpr); !ok {
 			continue
-		} else if fn.Sel.Name != "Dbg" {
+		} else if fn.Sel.Name != "Dbg" && fn.Sel.Name != "To" {
 			continue
 		}
 
